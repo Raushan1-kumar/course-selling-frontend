@@ -7,13 +7,15 @@ function Home() {
   const [studentCount, setStudentCount] = useState(null);
   const [courseCount, setCourseCount] = useState(null);
   const [totalEarnings, setTotalEarnings] = useState(null);
+  const [allStudents, setAllStudents] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     getStudentNumber();
     getCourseNumber();
-    // getTotalEarnings();
+    totalPayment();
+    recentStudent();
   }, [uId]);
 
   const getStudentNumber = async () => {
@@ -53,24 +55,36 @@ function Home() {
       setLoading(false);
     }
   };
+  
 
-  // const getTotalEarnings = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const response = await axios.get(`http://localhost:3003/fee/payment-history`, {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //       },
-  //     });
-  //     console.log(response.data);
-  //     setTotalEarnings(response.data.studentfee); // Adjust based on API response
-  //   } catch (error) {
-  //     console.error("Error fetching total earnings:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-  // const totalEarning= totalEarnings.reduce((sum, fee) => sum + (fee.amount || 0), 0);
+    const totalPayment = async()=>{
+      try{
+        const response = await axios.get('http://localhost:3003/fee/total-amount',{
+          headers:{
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          }
+        })
+        console.log(response);
+        setTotalEarnings(response.data.totalAmount)
+      }catch(err){
+        console.log(err)
+      }
+  
+    }
+
+    const recentStudent = async()=>{
+      try{
+        const response = await axios.get('http://localhost:3003/student/recent-students',{
+          headers:{
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          }
+        })
+        console.log(response);
+        setAllStudents(response.data.students);
+      }catch(err){
+        console.log(err);
+      }
+    }
 
   return (
     <div className="home-main-box">
@@ -112,11 +126,62 @@ function Home() {
           }}
         >
           <h1>Total Earning</h1>
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : totalEarnings !== null ? (
+            <h1>{totalEarnings}</h1>
+          ) : (
+            <p>No data available</p>
+          )}
         </div>
       </div>
       <div className="down-box">
-        <div className="student-detail-box">Student history</div>
-        <div className="payment-history-box">Payment history</div>
+        <div className="student-detail-box">
+          <h3>Recent Students</h3>
+        <div className="student-list-wrapper">
+      {allStudents.length > 0 ? (
+        <table className="student-table">
+          <thead>
+            <tr>
+              <th>Student's Pic</th>
+              <th>Full Name</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Date of Joining</th>
+            </tr>
+          </thead>
+          <tbody>
+            {allStudents.map((student) => (
+              <tr key={student.id || student.email} className="student-row"  onClick={() => { navigate('/dashboard/student-detail/'+student._id) }}>
+                <td>
+                  <img
+                    alt="student-profile"
+                    src={student.imageurl || "default-avatar.png"}
+                    className="student-image"
+                  />
+                </td>
+                <td>{student.fullName}</td>
+                <td>{student.phone}</td>
+                <td>{student.email}</td>
+                <td>
+                  {new Date(student.dateOfJoining).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>No students found.</p>
+      )}
+    </div>
+
+
+
+        </div>
       </div>
     </div>
   );

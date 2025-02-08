@@ -16,6 +16,8 @@ import CourseDetail from './components/CourseDetail';
 import EditCourse from './components/EditCourse';
 import EditStudent from './components/EditStudent';
 import DetailOfStudent from './components/DetailOfStudent';
+import PaymentForm from './components/PaymentForm';
+import FormBox from './components/FormBox';
 
 
 function App() {
@@ -36,6 +38,7 @@ function App() {
       {path:'edit-course/:id',Component:EditCourse},
       {path:'edit-student/:id',Component:EditStudent},
       {path:'student-detail/:id',Component:DetailOfStudent},
+      {path:'payment',Component:FormBox},
     ]},
   ])
   return (
